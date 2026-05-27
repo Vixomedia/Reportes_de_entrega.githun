@@ -1,0 +1,389 @@
+/* ═══════════════════════════════════════════════
+   VIXOMEDIA — Estilos responsivos
+   Soporta: móvil (≥320px), tablet (≥600px), laptop (≥900px), escritorio (≥1200px)
+   ═══════════════════════════════════════════════ */
+
+/* ── Variables de marca ─────────────────────────── */
+:root {
+  --brand-green:  #4CAF50;
+  --brand-dark:   #1a1a2e;
+  --brand-grey:   #f5f5f5;
+  --radius:       8px;
+  --gap:          12px;
+  --font:         'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Reset base ─────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: #f0f2f5;
+  color: #222;
+  padding: 16px;
+}
+
+/* ── Contenedor principal ───────────────────────── */
+.w3-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+}
+
+/* ── Encabezado: logo + formulario de folio ─────── */
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--gap);
+  margin-bottom: 16px;
+}
+
+.logo-wrapper img {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.folio-form {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.folio-form p {
+  margin-bottom: 10px;
+}
+
+.folio-form label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Compatibilidad con el form original (clase "form" de w3css) */
+form.w3-container {
+  margin: 0 !important;
+  width: 100% !important;
+  padding: 0 4px;
+}
+
+/* ── Inputs globales ────────────────────────────── */
+input.w3-input,
+textarea.w3-input {
+  width: 100% !important;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+}
+
+/* ── Tablas ─────────────────────────────────────── */
+table {
+  width: 100% !important;
+  margin: 0 0 12px 0 !important;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Scroll horizontal en pantallas muy pequeñas */
+.tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Primera tabla de datos del cliente */
+#tabla1 td {
+  vertical-align: middle;
+  padding: 6px 8px;
+  word-break: break-word;
+}
+
+#tabla1 td:first-child {
+  white-space: nowrap;
+  font-weight: 600;
+  width: 100px;
+}
+
+/* ── Tabla materiales ───────────────────────────── */
+#tabla-materiales {
+  word-break: break-word;
+}
+
+#tabla-materiales input.w3-input {
+  min-width: 0;
+}
+
+#tabla-materiales td {
+  padding: 6px 4px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Clase específica de cantidad (antes tenía ancho fijo) */
+.canitdad {
+  width: 100% !important;
+  max-width: 70px;
+}
+
+.marca,
+.modelo,
+.numero-serie {
+  width: 100% !important;
+}
+
+/* ── Textarea descripción / conclusión ──────────── */
+textarea {
+  width: 100% !important;
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--font);
+  font-size: 0.95rem;
+}
+
+/* ── Dirección (campo ancho) ────────────────────── */
+.g {
+  width: 100% !important;
+}
+
+/* ── Sección de firmas ──────────────────────────── */
+.firmas-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 16px 0;
+  justify-content: center;
+}
+
+.firma-col {
+  flex: 1 1 260px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Canvas responsivo */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fafafa;
+}
+
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 150px !important;
+  margin: 0 !important;
+  border: none !important;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.linea-firma {
+  position: absolute;
+  bottom: 28px;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: #aaa;
+  pointer-events: none;
+}
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-limpiar,
+.btn-guardar {
+  padding: 6px 18px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font);
+}
+
+.btn-limpiar  { background: #e53935; color: #fff; }
+.btn-guardar  { background: var(--brand-green); color: #fff; }
+
+.estado {
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ── Evidencia fotográfica ──────────────────────── */
+.foto-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* ━━━ 2 IMÁGENES POR FILA (pantalla y PDF) ━━━━━━━━
+   Cambia height para ajustar el tamaño visual
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.foto-card {
+  width: calc(50% - var(--gap));   /* 2 por fila siempre */
+  text-align: center;
+}
+
+.foto-card img {
+  width: 100%;
+  height: 450px;                   /* ← altura en pantalla */
+  object-fit: contain;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+}
+
+.foto-card p {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: #555;
+  word-break: break-all;
+}
+
+/* ── Botones verdes de agregar ──────────────────── */
+.w3-button.w3-green.w3-round {
+  font-size: 0.9rem;
+  padding: 6px 16px;
+}
+
+/* ═══════════════════════════════════
+   MEDIA QUERIES
+   ═══════════════════════════════════ */
+
+/* Tablet (≥ 600 px) */
+@media (min-width: 600px) {
+  body { padding: 20px; }
+  .logo-wrapper img { max-width: 280px; }
+  canvas { height: 160px !important; }
+  /* foto-card ya es 50% desde arriba, no se sobreescribe */
+}
+
+/* Laptop (≥ 900 px) */
+@media (min-width: 900px) {
+  body { padding: 24px; }
+  canvas { height: 170px !important; }
+  #tabla1 td:first-child { width: 120px; }
+  /* foto-card se mantiene en 2 columnas */
+}
+
+/* Escritorio (≥ 1200 px) */
+@media (min-width: 1200px) {
+  .w3-content { padding: 32px; }
+  /* foto-card se mantiene en 2 columnas */
+}
+
+/* Pantallas muy pequeñas (< 420 px) — 1 imagen por fila */
+@media (max-width: 420px) {
+  #tabla1 {
+    display: block;
+    overflow-x: auto;
+  }
+  #tabla1 tr {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #tabla1 td {
+    flex: 1 1 100%;
+  }
+  .acciones { flex-direction: column; align-items: center; }
+  .firmas-row { gap: 16px; }
+
+  .foto-card {
+    width: 100%;           /* en móvil muy pequeño, 1 por fila */
+  }
+  .foto-card img {
+    height: 300px;
+  }
+}
+
+/* ── Impresión ───────────────────────────────────── */
+@media print {
+
+  button,
+  input[type="file"],
+  .no_print,
+  .acciones {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  .w3-content {
+    box-shadow: none !important;
+    padding: 8px !important;
+    max-width: 100% !important;
+  }
+
+  #tabla1 tr,
+  #fila-tecnicos td {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  #fila-tecnicos td,
+  #tabla1 td {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+  }
+
+  #tabla-materiales {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  #tabla-materiales tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  canvas {
+    border: 1px solid #999 !important;
+  }
+
+  /* 2 fotos por hoja al imprimir */
+  .foto-preview {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .foto-card {
+    width: 100% !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .foto-card img {
+    width: 100% !important;
+    height: 500px !important;    /* ← altura en PDF */
+    object-fit: contain !important;
+    background: #f5f5f5 !important;
+  }
+}
+
+.oculto {
+  display: none !important;
+}
