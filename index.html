@@ -158,21 +158,26 @@
   </div>
 
   <!-- ── Evidencia fotográfica ─────────────────────── -->
-  <table class="w3-table w3-striped w3-hoverable w3-white">
-    <tr>
-      <td class="w3-center"><strong>Evidencia fotográfica</strong></td>
-    </tr>
-    <tr>
-      <td>
-        <p class="no_print">Sube las fotografías aquí. Puedes seleccionar varias imágenes.</p>
-        <input id="fotoInput" class="w3-input" type="file" accept="image/*" multiple onchange="mostrarFotos(this)">
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div id="fotoPreview" class="foto-preview"></div>
-      </td>
-    </tr>
+ <table class="w3-table w3-striped w3-hoverable w3-white">
+    <tbody>
+      <tr>
+        <td class="w3-center"><strong>Evidencia fotográfica</strong></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="no_print aviso-foto">Sube las fotografías aquí. Puedes seleccionar varias imágenes.</p>
+          <label class="btn-foto no_print" for="fotoInput">
+            <span>📷 Seleccionar imágenes</span>
+            <input id="fotoInput" type="file" accept="image/*" multiple onchange="mostrarFotos(this)">
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="fotoPreview" class="foto-preview"></div>
+        </td>
+      </tr>
+    </tbody>
   </table>
 
   <!-- ── Botón imprimir ──────────────────────── -->
