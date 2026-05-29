@@ -1,296 +1,284 @@
- const firmas = [
-      { canvasId: 'canvas1', wrapperId: 'wrapper1', estadoId: 'estado1', indId: 'ind1' },
-      { canvasId: 'canvas2', wrapperId: 'wrapper2', estadoId: 'estado2', indId: 'ind2' },
-    ];
+ // ── Iniciar ambas firmas ──────────────────────────────────────────────────────
+const firmas = [
+  { canvasId: 'canvas1', wrapperId: 'wrapper1' },
+  { canvasId: 'canvas2', wrapperId: 'wrapper2' },
+];
 
-    firmas.forEach(({ canvasId, wrapperId, estadoId, indId }) => {
-      iniciarFirma(canvasId, wrapperId, estadoId, indId);
-    });
+firmas.forEach(({ canvasId, wrapperId }) => {
+  iniciarFirma(canvasId, wrapperId);
+});
 
-    function iniciarFirma(canvasId, wrapperId, estadoId, indId) {
-      const canvas  = document.getElementById(canvasId);
-      const wrapper = document.getElementById(wrapperId);
-      const ctx     = canvas.getContext('2d');
+// ── Función principal de firma ────────────────────────────────────────────────
+function iniciarFirma(canvasId, wrapperId) {
+  const canvas  = document.getElementById(canvasId);
+  const wrapper = document.getElementById(wrapperId);
+  const ctx     = canvas.getContext('2d');
 
-      // Ajustar resolución real del canvas al tamaño CSS
-      function ajustarTamano() {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width  = rect.width  * window.devicePixelRatio;
-        canvas.height = rect.height * window.devicePixelRatio;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        ctx.strokeStyle = '#1a1a2e';
-        ctx.lineWidth   = 2;
-        ctx.lineCap     = 'round';
-        ctx.lineJoin    = 'round';
-      }
-      ajustarTamano();
-      window.addEventListener('resize', ajustarTamano);
+  // Aquí guardamos la firma como dataURL para restaurarla si el canvas cambia
+  let firmaGuardada = null;
+  let dibujando     = false;
 
-      let dibujando = false;
-      let firmado   = false;
+  // ── Ajustar resolución interna del canvas al tamaño real del wrapper ────────
+  function ajustarTamano() {
+    const dpr = window.devicePixelRatio || 1;
+    const w   = wrapper.clientWidth  || 300;
+    const h   = wrapper.clientHeight || 150;
 
-      function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const src  = e.touches ? e.touches[0] : e;
-        return {
-          x: src.clientX - rect.left,
-          y: src.clientY - rect.top,
-        };
-      }
+    // Solo redimensionar si cambió algo (evita borrar el dibujo innecesariamente)
+    const nuevoW = Math.round(w * dpr);
+    const nuevoH = Math.round(h * dpr);
 
-      function iniciar(e) {
-        e.preventDefault();
-        dibujando = true;
-        const { x, y } = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-      }
+    if (canvas.width === nuevoW && canvas.height === nuevoH) return;
 
-      function dibujar(e) {
-        if (!dibujando) return;
-        e.preventDefault();
-        const { x, y } = getPos(e);
-        ctx.lineTo(x, y);
-        ctx.stroke();
+    canvas.width  = nuevoW;
+    canvas.height = nuevoH;
 
-        
-      }
+    // Resetear transformación limpiamente y aplicar escala del dispositivo
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    configurarEstilo();
 
-      function terminar() { dibujando = false; }
+    // Restaurar firma si había una guardada
+    restaurarFirma();
+  }
 
-      // Mouse
-      canvas.addEventListener('mousedown',  iniciar);
-      canvas.addEventListener('mousemove',  dibujar);
-      canvas.addEventListener('mouseup',    terminar);
-      canvas.addEventListener('mouseleave', terminar);
+  function configurarEstilo() {
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth   = 2;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.imageSmoothingEnabled = true;
+  }
 
-      // Touch (móvil)
-      canvas.addEventListener('touchstart', iniciar,   { passive: false });
-      canvas.addEventListener('touchmove',  dibujar,   { passive: false });
-      canvas.addEventListener('touchend',   terminar);
-    }
+  // ── Guardar firma como imagen cada vez que el usuario termina de trazar ─────
+  function guardarSnapshot() {
+    // Sólo guardar si hay algo dibujado (evita guardar canvas vacíos)
+    firmaGuardada = canvas.toDataURL('image/png');
+  }
 
-    // ─── Limpiar canvas ───────────────────────────────────────────────────────
-    function limpiar(canvasId, wrapperId, estadoId) {
-      const canvas  = document.getElementById(canvasId);
-      const ctx     = canvas.getContext('2d');
-      const rect    = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width * window.devicePixelRatio, rect.height * window.devicePixelRatio);
-      document.getElementById(wrapperId).classList.remove('signed');
-      
-    }
+  // ── Restaurar la firma guardada al canvas ────────────────────────────────────
+  function restaurarFirma() {
+    if (!firmaGuardada) return;
+    const img = new Image();
+    img.onload = () => {
+      // Dibujar en coordenadas del canvas sin escala (CSS coords)
+      const dpr = window.devicePixelRatio || 1;
+      ctx.drawImage(img, 0, 0, canvas.width / dpr, canvas.height / dpr);
+    };
+    img.src = firmaGuardada;
+  }
 
-    // ─── Descargar firma como imagen ──────────────────────────────────────────
-    function descargar(canvasId, nombre) {
-      const canvas = document.getElementById(canvasId);
-      const link   = document.createElement('a');
-      link.download = nombre + '.png';
-      link.href     = canvas.toDataURL('image/png');
-      link.click();
-    }
+  // ── Obtener posición del toque/clic relativa al canvas ──────────────────────
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return {
+      x: src.clientX - rect.left,
+      y: src.clientY - rect.top,
+    };
+  }
 
-    // ─── Obtener base64 de una firma (para enviar al servidor) ────────────────
-    function obtenerBase64(canvasId) {
-      return document.getElementById(canvasId).toDataURL('image/png');
-    }
+  // ── Handlers de dibujo ───────────────────────────────────────────────────────
+  function iniciar(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dibujando = true;
+    const { x, y } = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
 
-    // ─── Enviar / guardar ─────────────────────────────────────────────────────
-    function enviar() {
-      const firma1 = obtenerBase64('canvas1');
-      const firma2 = obtenerBase64('canvas2');
+  function dibujar(e) {
+    if (!dibujando) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const { x, y } = getPos(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
 
-      // Aquí puedes hacer un fetch/POST a tu servidor:
-      // fetch('/guardar-firmas', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ firma1, firma2 })
-      // });
+  function terminar(e) {
+    if (!dibujando) return;
+    dibujando = false;
+    ctx.beginPath(); // evita que el siguiente trazo conecte con el anterior
+    guardarSnapshot(); // ← guardar la firma al soltar
+  }
 
-      // Demo: solo mostramos confirmación
-      alert('✅ Documento firmado correctamente.\n\nEn producción, las firmas se enviarían al servidor como imágenes Base64.'); 
-    }   
+  // ── Eventos mouse ────────────────────────────────────────────────────────────
+  canvas.addEventListener('mousedown',  iniciar);
+  canvas.addEventListener('mousemove',  dibujar);
+  canvas.addEventListener('mouseup',    terminar);
+  canvas.addEventListener('mouseleave', terminar);
 
-   function mostrarFotos(input) {
+  // ── Eventos touch (móvil / tablet) ──────────────────────────────────────────
+  canvas.addEventListener('touchstart', iniciar,  { passive: false });
+  canvas.addEventListener('touchmove',  dibujar,  { passive: false });
+  canvas.addEventListener('touchend',   terminar, { passive: false });
+  canvas.addEventListener('touchcancel',terminar, { passive: false });
+
+  // ── Ajuste inicial: doble RAF para garantizar que el DOM tenga dimensiones ───
+  requestAnimationFrame(() => requestAnimationFrame(ajustarTamano));
+
+  // ── Ajuste en resize (orientación, ventana) ──────────────────────────────────
+  // Usamos ResizeObserver para detectar cambios del wrapper específicamente
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => ajustarTamano());
+    ro.observe(wrapper);
+  } else {
+    window.addEventListener('resize', ajustarTamano);
+  }
+
+  // ── Exponemos el método de restauración para uso externo ────────────────────
+  canvas._restaurarFirma = restaurarFirma;
+  canvas._limpiarFirma   = () => { firmaGuardada = null; };
+}
+
+// ── Limpiar canvas ────────────────────────────────────────────────────────────
+function limpiar(canvasId, wrapperId) {
+  const canvas = document.getElementById(canvasId);
+  const ctx    = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (canvas._limpiarFirma) canvas._limpiarFirma();
+  document.getElementById(wrapperId).classList.remove('signed');
+}
+
+// ── Descargar firma ───────────────────────────────────────────────────────────
+function descargar(canvasId, nombre) {
+  const canvas = document.getElementById(canvasId);
+  const link   = document.createElement('a');
+  link.download = nombre + '.png';
+  link.href     = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ── Mostrar fotos (sin borrar firmas) ─────────────────────────────────────────
+function mostrarFotos(input) {
   const preview = document.getElementById('fotoPreview');
   preview.innerHTML = '';
-
   if (!input.files) return;
 
   Array.from(input.files).forEach((file, index) => {
     if (!file.type.startsWith('image/')) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       const container = document.createElement('div');
       container.className = 'foto-card';
-
-      // Cada imagen genera su propio input usando el índice
       container.innerHTML = `
         <img src="${reader.result}" alt="${file.name}">
         <p>${file.name}</p>
-        <input 
-          type="text" 
-          id="descripcion_${index}" 
-          name="descripcion_${index}"
-          class="w3-input" 
-          placeholder="Descripción de la foto ${index + 1}"
-        >
+        <input type="text" id="descripcion_${index}" name="descripcion_${index}"
+          class="w3-input" placeholder="Descripción de la foto ${index + 1}">
       `;
-
       preview.appendChild(container);
-    };
 
+      // Restaurar firmas después de agregar imágenes (el DOM puede haber
+      // forzado un reflow que borra los canvas)
+      requestAnimationFrame(() => {
+        document.querySelectorAll('canvas').forEach(c => {
+          if (c._restaurarFirma) c._restaurarFirma();
+        });
+      });
+    };
     reader.readAsDataURL(file);
   });
 }
 
-    function tenicos() {
-  const filaBoton = document.getElementById("fila-tecnicos");
-  
-  const nuevaFila = document.createElement("tr");
+// ── Agregar técnico ───────────────────────────────────────────────────────────
+function tenicos() {
+  const filaBoton = document.getElementById('fila-tecnicos');
+  const nuevaFila = document.createElement('tr');
   nuevaFila.innerHTML = `
     <td colspan="3"></td>
-    <td class="w3-center">Técnico:</td>
+    <td class="w3-center label-col">Técnico:</td>
     <td>
       <div style="display:flex; gap:6px; align-items:center;">
-       <textarea class="w3-input" rows="3" placeholder="Tencnicos....." 
+        <textarea class="w3-input" rows="2" placeholder="Nombre del técnico..."
           style="resize:vertical; width:100%;"></textarea>
-        <button class="w3-button w3-red w3-round" onclick="this.closest('tr').remove()">✕</button>
+        <button class="w3-button w3-red w3-round no_print"
+          onclick="this.closest('tr').remove()" style="white-space:nowrap;">✕</button>
       </div>
     </td>
   `;
-
-  // Insertar ANTES de la fila del botón
   filaBoton.parentNode.insertBefore(nuevaFila, filaBoton);
 }
 
- function descripcion() {
-  const filaBoton = document.getElementById("fila-descripcion");
-
-  const nuevaFila = document.createElement("tr");
+// ── Agregar descripción ───────────────────────────────────────────────────────
+function descripcion() {
+  const filaBoton = document.getElementById('fila-descripcion');
+  const nuevaFila = document.createElement('tr');
   nuevaFila.innerHTML = `
     <td>
-      <div style="display:flex; gap:6px; align-items:center;">
-         <textarea class="w3-input" rows="3" placeholder="Descripción del trabajo..." 
+      <div style="display:flex; gap:6px; align-items:flex-start;">
+        <textarea class="w3-input" rows="3" placeholder="Descripción del trabajo..."
           style="resize:vertical; width:100%;"></textarea>
-        <button class="w3-button w3-red w3-round" onclick="this.closest('tr').remove()">✕</button>
+        <button class="w3-button w3-red w3-round no_print"
+          onclick="this.closest('tr').remove()">✕</button>
       </div>
     </td>
   `;
-
-  // Inserta ANTES del botón → las descripciones quedan entre el título y el botón
   filaBoton.parentNode.insertBefore(nuevaFila, filaBoton);
 }
-    function materiales() {
-  const filaBoton = document.getElementById("fila-materiales");
 
-  const nuevaFila = document.createElement("tr");
+// ── Agregar material ──────────────────────────────────────────────────────────
+function materiales() {
+  const filaBoton = document.getElementById('fila-materiales');
+  const nuevaFila = document.createElement('tr');
   nuevaFila.innerHTML = `
-    <td><input class="w3-input canitdad" type="number" min="0" value="" style="width:60px;"></td>
-    <td><input class="w3-input marca" type="text" placeholder="Marca" style="width:300px;"></td>
+    <td><input class="w3-input canitdad" type="number" min="0" placeholder="0"></td>
+    <td><input class="w3-input marca" type="text" placeholder="Marca"></td>
     <td><input class="w3-input modelo" type="text" placeholder="Modelo"></td>
-    <td>
-      <div style="display:flex; gap:6px; align-items:center;">
-        <input class="w3-input numero-serie" type="text" placeholder="Número de serie">
-        <button class="w3-button w3-red w3-round" onclick="this.closest('tr').remove()">✕</button>
-      </div>
+    <td><input class="w3-input numero-serie" type="text" placeholder="Número de serie"></td>
+    <td class="no_print">
+      <button class="w3-button w3-red w3-round"
+        onclick="this.closest('tr').remove()">✕</button>
     </td>
   `;
-
   filaBoton.parentNode.insertBefore(nuevaFila, filaBoton);
 }
-    
-    function conclusion() {
-      const filaBoton = document.getElementById("fila-conclusion");
 
-  const nuevaFila = document.createElement("tr");
+// ── Agregar conclusión ────────────────────────────────────────────────────────
+function conclusion() {
+  const filaBoton = document.getElementById('fila-conclusion');
+  const nuevaFila = document.createElement('tr');
   nuevaFila.innerHTML = `
     <td>
-      <div style="display:flex; gap:6px; align-items:center;">
-         <textarea class="w3-input" rows="3" placeholder="Descripción del trabajo..." 
+      <div style="display:flex; gap:6px; align-items:flex-start;">
+        <textarea class="w3-input" rows="3" placeholder="Conclusión y acciones requeridas..."
           style="resize:vertical; width:100%;"></textarea>
-        <button class="w3-button w3-red w3-round" onclick="this.closest('tr').remove()">✕</button>
+        <button class="w3-button w3-red w3-round no_print"
+          onclick="this.closest('tr').remove()">✕</button>
       </div>
     </td>
   `;
-
-  // Inserta ANTES del botón → las descripciones quedan entre el título y el botón
   filaBoton.parentNode.insertBefore(nuevaFila, filaBoton);
-    }
+}
 
-    
-
-
-   /* function imprimir() {
-  // Guardar valores de inputs y textareas antes de imprimir
-  // (algunos navegadores los pierden al restaurar)
+// ── Imprimir / Descargar PDF ──────────────────────────────────────────────────
+function imprimir() {
+  // Guardar valores de todos los inputs/textareas
   const valores = [];
   document.querySelectorAll('input, textarea').forEach(el => {
     valores.push({ el, value: el.value });
   });
 
-  window.print();
+  // Nombre del archivo PDF
+  const campo1   = document.getElementById('num-reporte')?.value.trim()   || '';
+  const campo2   = document.getElementById('num-cotizacion')?.value.trim() || '';
+  const fechaRaw = document.getElementById('fecha_llenado')?.value          || '';
+  const campo3   = fechaRaw ? fechaRaw.split('-').reverse().join('-') : '';
 
-  // Restaurar valores por si el navegador los resetea
-  setTimeout(() => {
-    valores.forEach(({ el, value }) => { el.value = value; });
-  }, 500);
-} */
-/*function imprimir() {
-  // Guardar valores de inputs y textareas antes de imprimir
-  const valores = [];
-  document.querySelectorAll('input, textarea').forEach(el => {
-    valores.push({ el, value: el.value });
-  });
-
-  // --- NOMBRE DEL PDF ---
-  // Cambia estos IDs por los de tus campos
-  const campo1 = document.getElementById('num-reporte')?.value.trim() || '';
-  const campo2 = document.getElementById('num-cotizacion')?.value.trim() || '';
-  const campo3 = document.getElementById('fecha_llenado')?.value.trim() || '';
-
-  const partes = [campo1, campo2, campo3].filter(Boolean);
+  const partes        = [campo1, campo2, campo3].filter(Boolean);
   const nombreArchivo = partes.length > 0
     ? partes.join('_').replace(/\s+/g, '_')
-    : 'Reporte';
-
-  const tituloOriginal = document.title;
-  document.title = nombreArchivo;
-  // ----------------------
-
-  window.print();
-
-  // Restaurar título e inputs
-  setTimeout(() => {
-    document.title = tituloOriginal;
-    valores.forEach(({ el, value }) => { el.value = value; });
-  }, 1000);
-} */
-
-  function imprimir() {
-  const valores = [];
-  document.querySelectorAll('input, textarea').forEach(el => {
-    valores.push({ el, value: el.value });
-  });
-
-  const campo1 = document.getElementById('num-reporte')?.value.trim() || '';
-  const campo2 = document.getElementById('num-cotizacion')?.value.trim() || '';
-  const fechaRaw = document.getElementById('fecha_llenado')?.value || '';
-  const campo3 = fechaRaw ? fechaRaw.split('-').reverse().join('-') : '';
-
-  const partes = [campo1, campo2, campo3].filter(Boolean);
-  const nombreArchivo = partes.length > 0
-    ? partes.join('_').replace(/\s+/g, '_')
-    : 'Reporte';
+    : 'Reporte_Vixomedia';
 
   const tituloOriginal = document.title;
   document.title = nombreArchivo;
 
-  setTimeout(() => {          // ← espera 200ms antes de abrir el diálogo
+  setTimeout(() => {
     window.print();
     setTimeout(() => {
       document.title = tituloOriginal;
       valores.forEach(({ el, value }) => { el.value = value; });
-    }, 1000);
-  }, 200);
+    }, 1200);
+  }, 250);
 }
