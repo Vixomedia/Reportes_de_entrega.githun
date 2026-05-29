@@ -28,7 +28,6 @@
       </p>
       <p>
         <label>No. cotización:</label>
-        <!-- FIX 1: Limitado a 6 caracteres alfanuméricos -->
         <input id="num-cotizacion" class="w3-input" type="text" placeholder="COT-00" maxlength="6"
                pattern="[A-Za-z0-9]{1,6}" title="Máximo 6 caracteres alfanuméricos"
                oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g,'').slice(0,6)">
@@ -40,48 +39,46 @@
   <div class="tabla-scroll">
     <table id="tabla1" class="w3-table w3-striped w3-hoverable w3-white">
       <tr>
-        <td id = "fecha" class="w3-center">Fecha de llenado:</td>
+        <td class="label-col w3-center">Fecha de llenado:</td>
         <td><input id="fecha_llenado" class="w3-input" type="date"></td>
-        <td></td>
-        <td></td>
+        <td class="spacer-col"></td>
+        <td class="label-col w3-center"></td>
         <td></td>
       </tr>
       <tr>
-        <td class="w3-center">Cliente:</td>
+        <td class="label-col w3-center">Cliente:</td>
         <td><input class="w3-input" type="text"></td>
-        <td></td>
-        <td class="w3-center">Teléfono:</td>
-        <!-- FIX 2: Teléfono limitado a 10 dígitos -->
+        <td class="spacer-col"></td>
+        <td class="label-col w3-center">Teléfono:</td>
         <td><input class="w3-input" type="tel" maxlength="10" placeholder="10 dígitos"
                    oninput="this.value = this.value.replace(/\D/g,'').slice(0,10)"></td>
       </tr>
       <tr>
-        <td class="w3-center">Solicita:</td>
+        <td class="label-col w3-center">Solicita:</td>
         <td><input class="w3-input" type="text"></td>
-        <td></td>
-        <td class="w3-center">Correo:</td>
+        <td class="spacer-col"></td>
+        <td class="label-col w3-center">Correo:</td>
         <td><input class="w3-input" type="email"></td>
       </tr>
       <tr id="fila-tecnicos">
-        <td class="w3-center">Contacto:</td>
+        <td class="label-col w3-center">Contacto:</td>
         <td><input class="w3-input" type="text"></td>
-        <td></td>
-        <td class="w3-center oculto">Técnico(s):</td>
+        <td class="spacer-col"></td>
+        <td class="label-col w3-center oculto">Técnico(s):</td>
         <td class="w3-center">
           <button onclick="tenicos()" class="w3-button w3-green w3-round">+ Agregar técnico(s)</button>
         </td>
       </tr>
       <tr>
-        <td class="w3-center">Dirección:</td>
-        <td colspan="4"><input class="w3-input g" type="text"></td>
+        <td class="label-col w3-center">Dirección:</td>
+        <td colspan="4"><input class="w3-input" type="text"></td>
       </tr>
       <tr>
-        <td class="w3-center">Celular:</td>
-        <!-- FIX 3: Celular también limitado a 10 dígitos -->
+        <td class="label-col w3-center">Celular:</td>
         <td><input class="w3-input" type="tel" maxlength="10" placeholder="10 dígitos"
                    oninput="this.value = this.value.replace(/\D/g,'').slice(0,10)"></td>
-        <td></td>
-        <td class="w3-center">Fecha de entrega:</td>
+        <td class="spacer-col"></td>
+        <td class="label-col w3-center">Fecha de entrega:</td>
         <td><input class="w3-input" type="date"></td>
       </tr>
     </table>
@@ -103,16 +100,17 @@
   <div class="tabla-scroll">
     <table id="tabla-materiales" class="w3-table w3-bordered w3-striped w3-hoverable w3-white">
       <tr>
-        <td colspan="4" class="w3-center"><strong>Equipos y materiales instalados</strong></td>
+        <td colspan="5" class="w3-center"><strong>Equipos y materiales instalados</strong></td>
       </tr>
       <tr class="w3-light-grey">
         <td class="w3-center"><strong>Cant</strong></td>
         <td class="w3-center"><strong>Marca</strong></td>
         <td class="w3-center"><strong>Modelo</strong></td>
         <td class="w3-center"><strong>Número de serie</strong></td>
+        <td class="w3-center no_print"><strong>Acción</strong></td>
       </tr>
       <tr id="fila-materiales">
-        <td colspan="4" class="w3-center">
+        <td colspan="5" class="w3-center">
           <button onclick="materiales()" class="w3-button w3-green w3-round">+ Agregar materiales</button>
         </td>
       </tr>
@@ -135,33 +133,39 @@
   <div class="firmas-row">
     <!-- Firma cliente -->
     <div class="firma-col">
+      <p class="firma-titulo">Firma del cliente</p>
       <div class="canvas-wrapper" id="wrapper1">
         <canvas id="canvas1"></canvas>
         <div class="linea-firma"></div>
       </div>
-      <div class="acciones">
-        <button class="btn-limpiar" onclick="limpiar('canvas1','wrapper1','estado1')">Limpiar</button>
+      <div class="acciones no_print">
+        <button class="btn-limpiar" onclick="limpiar('canvas1','wrapper1')">Limpiar</button>
         <button class="btn-guardar" onclick="descargar('canvas1','firma-cliente')">Descargar</button>
       </div>
-      <p class="estado" id="estado1"><input class="w3-input" type="text" placeholder="Nombre del cliente" /></p>
+      <p class="estado" id="estado1">
+        <input class="w3-input" type="text" placeholder="Nombre del cliente">
+      </p>
     </div>
 
     <!-- Firma Vixomedia -->
     <div class="firma-col">
+      <p class="firma-titulo">Firma Vixomedia</p>
       <div class="canvas-wrapper" id="wrapper2">
         <canvas id="canvas2"></canvas>
         <div class="linea-firma"></div>
       </div>
-      <div class="acciones">
-        <button class="btn-limpiar" onclick="limpiar('canvas2','wrapper2','estado2')">Limpiar</button>
+      <div class="acciones no_print">
+        <button class="btn-limpiar" onclick="limpiar('canvas2','wrapper2')">Limpiar</button>
         <button class="btn-guardar" onclick="descargar('canvas2','firma-proveedor')">Descargar</button>
       </div>
-      <p class="estado" id="estado2"><input class="w3-input" type="text" placeholder="Nombre del responsable" /></p>
+      <p class="estado" id="estado2">
+        <input class="w3-input" type="text" placeholder="Nombre del responsable">
+      </p>
     </div>
   </div>
 
   <!-- ── Evidencia fotográfica ─────────────────────── -->
- <table class="w3-table w3-striped w3-hoverable w3-white">
+  <table class="w3-table w3-striped w3-hoverable w3-white">
     <tbody>
       <tr>
         <td class="w3-center"><strong>Evidencia fotográfica</strong></td>
@@ -184,9 +188,8 @@
   </table>
 
   <!-- ── Botón imprimir ──────────────────────── -->
-  <div style="text-align:center; margin: 20px 0;">
-    <button onclick="imprimir()" class="w3-button w3-round"
-      style="background:#1a1a2e; color:#fff; padding:12px 36px; font-size:1rem; letter-spacing:.5px;">
+  <div class="btn-imprimir-wrap no_print">
+    <button onclick="imprimir()" class="btn-pdf">
       ⬇ Descargar PDF
     </button>
   </div>
